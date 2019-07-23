@@ -9,8 +9,8 @@ redirect_url = 'https://localhost:8080'
 #get token
 scope = 'user-library-read'
 
-#DEFINE USER AND KEYS HERE
-user_keys = {'user':'', 'client_id':'', 'client_secret':''}
+#DEFINE KEYS HERE
+user_keys = {'client_id':'', 'client_secret':''}
 
 #CHOOSE ARTIST URI HERE
 artistUri = ''
@@ -19,21 +19,10 @@ birdy_uri = 'spotify:artist:' + artistUri
 
 #Creates an instance of the spotify api with your user authentication
 def createAPIConnection():
-	try:
-	    token = util.prompt_for_user_token(user_keys['user'], scope, 
-	                                       client_id=user_keys['client_id'], 
-	                                       client_secret=user_keys['client_secret'], 
-	                                       redirect_uri=redirect_url)
-	    
-	except (AttributeError, JSONDecodeError):
-	    os.remove(f".cache-{user_keys['user']}")
-	    token = util.prompt_for_user_token(user_keys['user'], scope, 
-	                                       client_id=user_keys['client_id'], 
-	                                       client_secret=user_keys['client_secret'], 
-	                                       redirect_uri=redirect_url)
-
-	sp = spotipy.Spotify(auth=token)
-	return sp
+    token = util.oauth2.SpotifyClientCredentials(client_id=user_keys['client_id'], client_secret=user_keys['client_secret'])
+    cache_token = token.get_access_token()
+    spotify = spotipy.Spotify(cache_token)
+    return spotify
 
 #returns a list of albums and ids for a given artist uri
 def findAlbumsForArtist(sp):
